@@ -1,4 +1,5 @@
 use buffer::ReadBuffer;
+use crate::header_parser::Parser;
 use httparse::Result;
 use threads_pool::ThreadPool;
 use std::collections::HashMap;
@@ -63,6 +64,18 @@ impl HttpServer {
 
         let header = String::from_utf8_lossy(&header);
 
-        println!("header: {}", header);
+        let parser = Parser::new(&header);
+
+        let method = parser.method();
+        let path = parser.path();
+        let version = parser.version();
+
+        let headers = parser.headers();
+
+        println!("Version: {}", version);
+        println!("Path: {}", path);
+        println!("Method: {}\n\n", method);
+
+        println!("{:?}", headers);
     }
 }
