@@ -1,9 +1,12 @@
-use buffer::ReadBuffer;
 use crate::header_parser::Parser;
-use httparse::Result;
+
+use buffer::ReadBuffer;
 use threads_pool::ThreadPool;
 use std::collections::HashMap;
-use std::net::{TcpListener, TcpStream};
+use std::net::{
+    TcpListener,
+    TcpStream
+};
 
 type Pages = HashMap<String, Box<dyn Fn() -> String>>;
 
@@ -54,7 +57,7 @@ impl HttpServer {
                     Ok(stream) => Self::handle_connection(stream),
                     Err(_) => {}
                 }
-            });
+            }).unwrap();
         }
     }
 

@@ -22,7 +22,7 @@ impl<'a> Parser<'a> {
         let mut buf = [EMPTY_HEADER; 16];
         let mut request = Request::new(&mut buf);
 
-        request.parse(content.as_bytes());
+        request.parse(content.as_bytes()).unwrap();
 
 
         let method = request.method.unwrap();
@@ -47,8 +47,16 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn build_request() -> request::Request<()> {
-        request::Request::new(())
+    pub fn build_request(self) -> request::Request<()> {
+        let mut req = request::Builder::new()
+            .method(self.method)
+            .uri(self.path);    //Creating request witch patch and method
+
+        for (k, v) in self.headers {
+            req = req.header(k, v);
+        } //Adding headers to request
+
+        req.body(()).unwrap()
     }
 
     pub fn method(&self) -> &str {
