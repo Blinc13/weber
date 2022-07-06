@@ -1,3 +1,7 @@
+pub use server::HttpServer;
+
+mod server;
+
 #[cfg(test)]
 mod tests {
     #[test]
