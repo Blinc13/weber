@@ -1,5 +1,4 @@
-//TODO:
-//Rewrite this shit!
+//TODO: Rewrite this shit!
 use std::collections::HashMap;
 use http::request;
 use httparse::{
@@ -18,7 +17,7 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(content: &'a str) -> Self {
+    pub fn parse(content: &'a str) -> Self {
         let mut buf = [EMPTY_HEADER; 16];
         let mut request = Request::new(&mut buf);
 

@@ -1,14 +1,19 @@
+//TODO: Refactor this
+
 use crate::header_parser::Parser;
 
 use buffer::ReadBuffer;
-use threads_pool::ThreadPool;
-use std::collections::HashMap;
+use threads_pool::{PoolState, ThreadPool};
+use std::{
+    collections::HashMap,
+    sync::Arc
+};
 use std::net::{
     TcpListener,
     TcpStream
 };
 
-type Pages = HashMap<String, Box<dyn Fn() -> String>>;
+type Pages = HashMap<String, Box<dyn Fn() -> String + Sync + Send>>;
 
 ///# HttpServer struct.
 ///
@@ -25,13 +30,13 @@ type Pages = HashMap<String, Box<dyn Fn() -> String>>;
 ///```
 pub struct HttpServer {
     workers: ThreadPool,
-    pages: Pages
+    pages: Option<Pages>
 }
 
 impl HttpServer {
     pub fn new(thread_count: usize) -> Self {
         let workers = ThreadPool::new(thread_count);
-        let pages = HashMap::new();
+        let pages = Some(HashMap::new());
 
         Self {
             workers,
@@ -39,46 +44,52 @@ impl HttpServer {
         }
     }
 
+    ///Adds a closure associated with the page
     pub fn add_page<T>(&mut self, page: String, func: T)
-        where T: Fn() -> String + 'static
+        where T: Fn() -> String + Sync + Send + 'static
     {
         let func = Box::new(func);
 
-        self.pages.insert(page, func);
+        self.pages.as_mut()
+            .unwrap()
+            .insert(page, func);
     }
 
-    pub fn run(&mut self) {
+    pub fn run(mut self) {
         let listener = TcpListener::bind("127.0.0.1:7080")
             .unwrap();
 
+        let ptr = Arc::new(self.pages.take().unwrap());
+
         for connection in listener.incoming() {
-            self.workers.execute(|| {
-                match connection {
-                    Ok(stream) => Self::handle_connection(stream),
-                    Err(_) => {}
-                }
-            }).unwrap();
+            if let Ok(connection) = connection {
+                self.listen_connection(connection, ptr.clone());
+            }
         }
     }
 
-    fn handle_connection(mut stream: TcpStream) {
-        let mut header = Vec::with_capacity(512);
-        stream.read_buffer(&mut header).unwrap();
+    fn listen_connection(&mut self, connection: TcpStream, ptr: Arc<Pages>) {
+        self.workers.execute(move || {
+            Self::response(connection, ptr);
+        });
+    }
 
-        let header = String::from_utf8_lossy(&header);
+    fn response(mut stream: TcpStream, pages_list: Arc<Pages>) {
+        let buf = Self::read_from_stream(&mut stream, 512);
+        let parsed_header = Parser::parse(&buf);
 
-        let parser = Parser::new(&header);
+        let func = pages_list.get(parsed_header.path());
 
-        let method = parser.method();
-        let path = parser.path();
-        let version = parser.version();
+        let content = match func {
+            Some(func) => func(),
+            None => "Page not found".to_string()
+        };
+    }
 
-        let headers = parser.headers();
+    fn read_from_stream(stream: &mut TcpStream, len: usize) -> String {
+        let mut buf = Vec::with_capacity(len);
+        stream.read_buffer(&mut buf).unwrap();
 
-        println!("Version: {}", version);
-        println!("Path: {}", path);
-        println!("Method: {}\n\n", method);
-
-        println!("{:?}", headers);
+        String::from_utf8(buf).unwrap()
     }
 }
