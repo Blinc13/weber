@@ -1,17 +1,11 @@
 //TODO: Refactor this
 
-use crate::header_parser::Parser;
+use crate::parser::request::parser::RequestParser as Parser;
 
 use buffer::ReadBuffer;
-use threads_pool::{PoolState, ThreadPool};
-use std::{
-    collections::HashMap,
-    sync::Arc
-};
-use std::net::{
-    TcpListener,
-    TcpStream
-};
+use std::net::{TcpListener, TcpStream};
+use std::{collections::HashMap, sync::Arc};
+use threads_pool::ThreadPool;
 
 type Pages = HashMap<String, Box<dyn Fn() -> String + Sync + Send>>;
 
@@ -22,7 +16,7 @@ type Pages = HashMap<String, Box<dyn Fn() -> String + Sync + Send>>;
 ///
 ///# Example
 ///```
-///let mut server = weber::HttpServer::new();
+///let mut server = weber::HttpServer::new(1);
 ///
 ///server.add_page("/".to_string(), || {
 ///   "some_page".to_string()
@@ -30,7 +24,7 @@ type Pages = HashMap<String, Box<dyn Fn() -> String + Sync + Send>>;
 ///```
 pub struct HttpServer {
     workers: ThreadPool,
-    pages: Option<Pages>
+    pages: Option<Pages>,
 }
 
 impl HttpServer {
@@ -38,26 +32,21 @@ impl HttpServer {
         let workers = ThreadPool::new(thread_count);
         let pages = Some(HashMap::new());
 
-        Self {
-            workers,
-            pages
-        }
+        Self { workers, pages }
     }
 
     ///Adds a closure associated with the page
     pub fn add_page<T>(&mut self, page: String, func: T)
-        where T: Fn() -> String + Sync + Send + 'static
+    where
+        T: Fn() -> String + Sync + Send + 'static,
     {
         let func = Box::new(func);
 
-        self.pages.as_mut()
-            .unwrap()
-            .insert(page, func);
+        self.pages.as_mut().unwrap().insert(page, func);
     }
 
     pub fn run(mut self) {
-        let listener = TcpListener::bind("127.0.0.1:7080")
-            .unwrap();
+        let listener = TcpListener::bind("127.0.0.1:7080").unwrap();
 
         let ptr = Arc::new(self.pages.take().unwrap());
 
@@ -69,20 +58,22 @@ impl HttpServer {
     }
 
     fn listen_connection(&mut self, connection: TcpStream, ptr: Arc<Pages>) {
-        self.workers.execute(move || {
-            Self::response(connection, ptr);
-        });
+        self.workers
+            .execute(move || {
+                Self::response(connection, ptr);
+            })
+            .unwrap();
     }
 
     fn response(mut stream: TcpStream, pages_list: Arc<Pages>) {
         let buf = Self::read_from_stream(&mut stream, 512);
-        let parsed_header = Parser::parse(&buf);
+        let parsed_header = Parser::parse(&buf).unwrap();
 
-        let func = pages_list.get(parsed_header.path());
+        let func = pages_list.get(parsed_header.path);
 
         let content = match func {
             Some(func) => func(),
-            None => "Page not found".to_string()
+            None => "Page not found".to_string(),
         };
     }
 

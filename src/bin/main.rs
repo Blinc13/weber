@@ -10,7 +10,8 @@ fn main() {
                 <h1>Hello world!</h1>
             </head>
         </html>
-        ".to_string()
+        "
+        .to_string();
     });
 
     server.run();

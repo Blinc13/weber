@@ -10,4 +10,3 @@ authors = ["Blinc <https://github.com/Blinc13>"]
 threads_pool = "0.2.6"
 httparse = "1.7.1"
 buffer = "0.1.9"
-http = "0.2.8"
