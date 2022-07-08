@@ -1,5 +1,9 @@
-use weber::parser::request::builder::{RequestBuilder, GET};
-use weber::parser::request::parser::RequestParser;
+use weber::parser::request::{
+    parser::RequestParser,
+    builder::RequestBuilder,
+
+    Method::*
+};
 
 #[test]
 fn request_builder_test() {

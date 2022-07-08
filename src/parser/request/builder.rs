@@ -1,19 +1,21 @@
-use crate::parser::Header;
+use crate::parser::{
+    Header,
+    request::Method
+};
 use std::{
-    io::{Result, Write},
+    io::{Result as IoRes, Write},
     net::TcpStream,
 };
-
-pub const GET: &str = "GET";
-pub const POST: &str = "POST";
-
 
 ///This structure describes the request builder
 ///
 ///It's easier to see than to describe
 ///# Example
 ///```
-///use weber::parser::request::builder::{GET, RequestBuilder};
+///use weber::parser::request::{
+///    builder::RequestBuilder,
+///    Method::GET
+///};
 ///
 ///let builded_string = RequestBuilder::new()
 ///        .set_version(1)
@@ -25,27 +27,38 @@ pub const POST: &str = "POST";
 ///println!("{}", builded_string);
 ///```
 ///# PS
-///All structure fields are public and can be set manually
+///All structure fields are public,
+///except for content field,
+///because it cannot be used in a GET request
+///```
+///use weber::parser::request::builder::RequestBuilder;
+///
+///let builder = RequestBuilder::new().set_content("abc");
+///
+///assert!(builder.is_err());
+///```
 pub struct RequestBuilder<'a> {
-    pub method: &'a str,
+    pub method: Method,
     pub path: &'a str,
     pub version: u8,
 
     pub headers: Vec<Header<'a>>,
+    content: Option<&'a str>
 }
 
 impl<'a> RequestBuilder<'a> {
     pub fn new() -> Self {
         Self {
-            method: GET,
+            method: Method::GET,
             path: "/",
             version: 1,
 
             headers: Vec::new(),
+            content: None
         }
     }
 
-    pub fn set_method(mut self, method: &'a str) -> Self {
+    pub fn set_method(mut self, method: Method) -> Self {
         self.method = method;
 
         self
@@ -70,12 +83,22 @@ impl<'a> RequestBuilder<'a> {
         self
     }
 
+    pub fn set_content(mut self, content: &'a str) -> Result<Self, ()> {
+        if let Method::POST = self.method {
+            self.content = Some(content);
+
+            Ok(self)
+        } else {
+            Err(())
+        }
+    }
+
     pub fn build(self) -> String {
         self.format()
     }
 
     ///Consumes a builder and writes it to the passed stream
-    pub fn send(self, stream: &mut TcpStream) -> Result<usize> {
+    pub fn send(self, stream: &mut TcpStream) -> IoRes<usize> {
         stream.write(self.build().as_bytes())
     }
 
