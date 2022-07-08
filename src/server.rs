@@ -1,13 +1,16 @@
 //TODO: Refactor this
 
-use crate::parser::request::parser::RequestParser as Parser;
+use crate::parser::{
+    request::parser::RequestParser as Parser,
+    response::builder::ResponseBuilder
+};
 
 use buffer::ReadBuffer;
 use std::net::{TcpListener, TcpStream};
 use std::{collections::HashMap, sync::Arc};
 use threads_pool::ThreadPool;
 
-type Pages = HashMap<String, Box<dyn Fn() -> String + Sync + Send>>;
+type Pages = HashMap<String, Box<dyn Fn(Parser) -> String + Sync + Send>>;
 
 ///# HttpServer struct.
 ///
@@ -38,7 +41,7 @@ impl HttpServer {
     ///Adds a closure associated with the page
     pub fn add_page<T>(&mut self, page: String, func: T)
     where
-        T: Fn() -> String + Sync + Send + 'static,
+        T: Fn(Parser) -> String + Sync + Send + 'static,
     {
         let func = Box::new(func);
 
@@ -72,9 +75,13 @@ impl HttpServer {
         let func = pages_list.get(parsed_header.path);
 
         let content = match func {
-            Some(func) => func(),
+            Some(func) => func(parsed_header),
             None => "Page not found".to_string(),
         };
+
+        ResponseBuilder::new()
+            .set_content(&content)
+            .send(&mut stream).unwrap();
     }
 
     fn read_from_stream(stream: &mut TcpStream, len: usize) -> String {

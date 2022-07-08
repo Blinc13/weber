@@ -1,3 +1,5 @@
+//TODO: If possible, reconsider the solution with the content field
+
 use crate::parser::Header;
 use std::{
     io::{Result, Write},
@@ -14,6 +16,7 @@ pub struct ResponseBuilder<'a> {
 
     pub reason: &'a str,
     pub headers: Vec<Header<'a>>,
+    pub content: &'a str
 }
 
 impl<'a> ResponseBuilder<'a> {
@@ -24,6 +27,7 @@ impl<'a> ResponseBuilder<'a> {
 
             reason: "OK",
             headers: Vec::new(),
+            content: ""
         }
     }
 
@@ -41,6 +45,12 @@ impl<'a> ResponseBuilder<'a> {
 
     pub fn set_reason(mut self, reason: &'a str) -> Self {
         self.reason = reason;
+
+        self
+    }
+
+    pub fn set_content(mut self, content: &'a str) -> Self {
+        self.content = content;
 
         self
     }
@@ -68,8 +78,8 @@ impl<'a> ResponseBuilder<'a> {
             .collect();
 
         format!(
-            "HTTP/1.{} {} {}\r\n{}\r\n",
-            self.version, self.code, self.reason, header
+            "HTTP/1.{} {} {}\r\n{}\r\n{}\r\n",
+            self.version, self.code, self.reason, header, self.content
         )
     }
 }
