@@ -2,7 +2,11 @@ use std::collections::HashMap;
 
 use httparse::{Error, Response, EMPTY_HEADER};
 
-#[derive(Debug)]
+
+///This structure describes the parsed response
+///
+///The same rights apply here as for
+///weber::parser::request::parser::RequestParser
 pub struct ResponseParser<'a> {
     pub version: u8,
     pub code: u16,

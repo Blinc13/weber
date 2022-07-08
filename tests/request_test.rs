@@ -1,4 +1,4 @@
-use weber::parser::request::builder::{GET, RequestBuilder};
+use weber::parser::request::builder::{RequestBuilder, GET};
 use weber::parser::request::parser::RequestParser;
 
 #[test]

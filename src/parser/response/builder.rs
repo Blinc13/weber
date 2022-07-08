@@ -4,6 +4,10 @@ use std::{
     net::TcpStream,
 };
 
+///This structure describes the request builder
+///
+///I don't want to write documentation so see
+///weber::parser::request::builder::RequestBuilder
 pub struct ResponseBuilder<'a> {
     pub version: u8,
     pub code: u16,

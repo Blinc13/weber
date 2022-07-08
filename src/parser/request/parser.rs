@@ -1,6 +1,24 @@
 use httparse::{Error, Request, EMPTY_HEADER};
 use std::collections::HashMap;
 
+///This structure describes the parsed HTTP request
+///
+///All structure fields are public, access them directly
+///# Example
+///```
+///use weber::parser::request::builder::{GET, RequestBuilder};
+///use weber::parser::request::parser::RequestParser;
+///
+///let request = RequestBuilder::new()
+///        .set_header("Example", "test")
+///        .build();
+///
+///let parsed = RequestParser::parse(&request)
+///        .unwrap();
+///
+///assert_eq!(parsed.method, GET);
+///assert_eq!(parsed.path, "/");
+///```
 pub struct RequestParser<'a> {
     pub method: &'a str,
     pub path: &'a str,
