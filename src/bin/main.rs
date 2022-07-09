@@ -3,7 +3,7 @@ use weber::HttpServer;
 fn main() {
     let mut server = HttpServer::new(4);
 
-    server.add_page("/".to_string(), | parsed | {
+    server.add_page("/".to_string(), | _ | {
         return "<!DOCTYPE html>
         <html>
             <head>

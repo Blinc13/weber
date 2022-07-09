@@ -3,14 +3,8 @@ use buffer::ReadBuffer;
 use std::io::{Result, Write};
 use std::net::TcpStream;
 
-use crate::parser::{
-    request::parser::RequestParser,
-    response::builder::ResponseBuilder
-};
-
 const CAPACITY: usize = 512;
 
-#[derive(Debug)]
 pub struct Connection {
     stream: TcpStream,
 

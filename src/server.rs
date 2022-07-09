@@ -4,9 +4,11 @@ use crate::parser::{
     request::parser::RequestParser,
     response::builder::ResponseBuilder
 };
-use crate::net::connection::Connection;
+use crate::net::{
+    Listener,
+    Connection
+};
 
-use std::net::TcpListener;
 use std::{collections::HashMap, sync::Arc};
 use threadpool::ThreadPool;
 
@@ -49,23 +51,17 @@ impl HttpServer {
     }
 
     pub fn run(mut self) {
-        let listener = TcpListener::bind("127.0.0.1:7080").unwrap();
+        let listener = Listener::new();
 
         let ptr = Arc::new(self.pages.take().unwrap());
 
-        for connection in listener.incoming() {
-            if let Ok(connection) = connection {
-                self.listen_connection(Connection::new(connection), ptr.clone());
-            } else {
-                println!("Connection error");
-            }
-        }
-    }
+        for connection in listener.listen() {
+            let copy = ptr.clone();
 
-    fn listen_connection(&mut self, connection: Connection, ptr: Arc<Pages>) {
-        self.workers.execute(move || {
-                Self::response(connection, ptr);
+            self.workers.execute(move || {
+                Self::response(connection, copy)
             });
+        }
     }
 
     fn response(mut connection: Connection, pages_list: Arc<Pages>) {

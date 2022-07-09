@@ -1,4 +1,5 @@
 pub use connection::Connection;
+pub use listener::Listener;
 
 pub mod connection;
-mod listener;
+pub mod listener;

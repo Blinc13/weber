@@ -1,4 +1,4 @@
-use std::net::{TcpListener, Incoming};
+use std::net::TcpListener;
 use crate::net::Connection;
 
 pub struct Listener {
@@ -12,14 +12,12 @@ impl Listener {
         }
     }
 
-    pub fn listen(&self) {
-        let iter = ConnectionIter::new(self.listener.incoming());
-
-        let vec: Vec<_> = iter.take(1).collect();
-
-        println!("{:?}", vec);
+    pub fn listen(&self) -> ConnectionIter {
+        ConnectionIter::new(self.listener.incoming())
     }
 }
+
+
 
 pub struct ConnectionIter<'a> {
     iter: std::net::Incoming<'a>
