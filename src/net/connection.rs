@@ -10,6 +10,7 @@ use crate::parser::{
 
 const CAPACITY: usize = 512;
 
+#[derive(Debug)]
 pub struct Connection {
     stream: TcpStream,
 

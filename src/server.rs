@@ -1,7 +1,7 @@
 //TODO: Refactor this
 
 use crate::parser::{
-    request::parser::RequestParser as Parser,
+    request::parser::RequestParser,
     response::builder::ResponseBuilder
 };
 use crate::net::connection::Connection;
@@ -9,9 +9,8 @@ use crate::net::connection::Connection;
 use std::net::TcpListener;
 use std::{collections::HashMap, sync::Arc};
 use threads_pool::ThreadPool;
-use crate::parser::request::parser::RequestParser;
 
-type Pages = HashMap<String, Box<dyn Fn(Parser) -> String + Sync + Send>>;
+type Pages = HashMap<String, Box<dyn Fn(RequestParser) -> String + Sync + Send>>;
 
 ///# HttpServer struct.
 ///
@@ -42,7 +41,7 @@ impl HttpServer {
     ///Adds a closure associated with the page
     pub fn add_page<T>(&mut self, page: String, func: T)
     where
-        T: Fn(Parser) -> String + Sync + Send + 'static,
+        T: Fn(RequestParser) -> String + Sync + Send + 'static,
     {
         let func = Box::new(func);
 
