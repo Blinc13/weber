@@ -33,11 +33,11 @@ pub struct RequestParser<'a> {
 }
 
 impl<'a> RequestParser<'a> {
-    pub fn parse(content: &'a str) -> Result<Self, Error> {
+    pub fn parse(content: &'a [u8]) -> Result<Self, Error> {
         let mut buf = [EMPTY_HEADER; 16];
         let mut request = Request::new(&mut buf);
 
-        request.parse(content.as_bytes())?;
+        request.parse(content)?;
 
         let method_str = request.method.unwrap();
         let version = request.version.unwrap();

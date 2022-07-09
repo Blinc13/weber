@@ -4,11 +4,12 @@ use crate::parser::{
     request::parser::RequestParser as Parser,
     response::builder::ResponseBuilder
 };
+use crate::net::connection::Connection;
 
-use buffer::ReadBuffer;
-use std::net::{TcpListener, TcpStream};
+use std::net::TcpListener;
 use std::{collections::HashMap, sync::Arc};
 use threads_pool::ThreadPool;
+use crate::parser::request::parser::RequestParser;
 
 type Pages = HashMap<String, Box<dyn Fn(Parser) -> String + Sync + Send>>;
 
@@ -21,7 +22,7 @@ type Pages = HashMap<String, Box<dyn Fn(Parser) -> String + Sync + Send>>;
 ///```
 ///let mut server = weber::HttpServer::new(1);
 ///
-///server.add_page("/".to_string(), || {
+///server.add_page("/".to_string(), | _ | {
 ///   "some_page".to_string()
 ///});
 ///```
@@ -55,12 +56,14 @@ impl HttpServer {
 
         for connection in listener.incoming() {
             if let Ok(connection) = connection {
-                self.listen_connection(connection, ptr.clone());
+                self.listen_connection(Connection::new(connection), ptr.clone());
+            } else {
+                println!("Connection error");
             }
         }
     }
 
-    fn listen_connection(&mut self, connection: TcpStream, ptr: Arc<Pages>) {
+    fn listen_connection(&mut self, connection: Connection, ptr: Arc<Pages>) {
         self.workers
             .execute(move || {
                 Self::response(connection, ptr);
@@ -68,26 +71,21 @@ impl HttpServer {
             .unwrap();
     }
 
-    fn response(mut stream: TcpStream, pages_list: Arc<Pages>) {
-        let buf = Self::read_from_stream(&mut stream, 512);
-        let parsed_header = Parser::parse(&buf).unwrap();
+    fn response(mut connection: Connection, pages_list: Arc<Pages>) {
+        let buf = connection.read_buf().unwrap();
 
-        let func = pages_list.get(parsed_header.path);
+        let parsed = RequestParser::parse(&buf)
+                .unwrap();
 
-        let content = match func {
-            Some(func) => func(parsed_header),
-            None => "Page not found".to_string(),
+        let content = match pages_list.get(parsed.path) {
+            Some(func) => func(parsed),
+            None => "PAGE NOT FOUND".to_string()
         };
 
-        ResponseBuilder::new()
-            .set_content(&content)
-            .send(&mut stream).unwrap();
-    }
+        let resp = ResponseBuilder::new()
+                .set_content(&content)
+                .build();
 
-    fn read_from_stream(stream: &mut TcpStream, len: usize) -> String {
-        let mut buf = Vec::with_capacity(len);
-        stream.read_buffer(&mut buf).unwrap();
-
-        String::from_utf8(buf).unwrap()
+        connection.write_buf(resp.as_bytes());
     }
 }
