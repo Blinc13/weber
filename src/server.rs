@@ -8,7 +8,7 @@ use crate::net::connection::Connection;
 
 use std::net::TcpListener;
 use std::{collections::HashMap, sync::Arc};
-use threads_pool::ThreadPool;
+use threadpool::ThreadPool;
 
 type Pages = HashMap<String, Box<dyn Fn(RequestParser) -> String + Sync + Send>>;
 
@@ -63,11 +63,9 @@ impl HttpServer {
     }
 
     fn listen_connection(&mut self, connection: Connection, ptr: Arc<Pages>) {
-        self.workers
-            .execute(move || {
+        self.workers.execute(move || {
                 Self::response(connection, ptr);
-            })
-            .unwrap();
+            });
     }
 
     fn response(mut connection: Connection, pages_list: Arc<Pages>) {
