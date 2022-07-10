@@ -106,11 +106,11 @@ impl<'a> RequestBuilder<'a> {
         let headers: String = self
             .headers
             .iter()
-            .map(|header| header.to_string() + "\n")
+            .map(|header| header.to_string() + "\r\n")
             .collect();
 
         format!(
-            "{} {} HTTP/1.{}\r\n{}",
+            "{} {} HTTP/1.{}\r\n{}\r\n",
             self.method, self.path, self.version, headers
         )
     }

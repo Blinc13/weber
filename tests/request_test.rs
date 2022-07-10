@@ -14,6 +14,8 @@ fn request_builder_test() {
         .set_version(1)
         .build();
 
+    println!("{:?}", builded);
+
     let parsed = RequestParser::parse(builded.as_bytes());
     let parsed = parsed.unwrap();
 

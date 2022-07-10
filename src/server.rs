@@ -12,7 +12,8 @@ use crate::net::{
 use std::{collections::HashMap, sync::Arc};
 use threadpool::ThreadPool;
 
-type Pages = HashMap<String, Box<dyn Fn(RequestParser) -> String + Sync + Send>>;
+type Page = Box<dyn Fn(&RequestParser) -> String + Sync + Send>;
+type Pages = HashMap<String, Page>;
 
 ///# HttpServer struct.
 ///
@@ -43,11 +44,17 @@ impl HttpServer {
     ///Adds a closure associated with the page
     pub fn add_page<T>(&mut self, page: String, func: T)
     where
-        T: Fn(RequestParser) -> String + Sync + Send + 'static,
+        T: Fn(&RequestParser) -> String + Sync + Send + 'static,
     {
         let func = Box::new(func);
 
         self.pages.as_mut().unwrap().insert(page, func);
+    }
+
+    pub fn add_resource(&mut self,page: String, resource: &'static str) {
+        self.add_page(page, move | _ | {
+            std::fs::read_to_string(resource).unwrap()
+        });
     }
 
     pub fn run(mut self) {
@@ -65,13 +72,10 @@ impl HttpServer {
     }
 
     fn response(mut connection: Connection, pages_list: Arc<Pages>) {
-        let buf = connection.read_buf().unwrap();
+        let parsed = connection.parse_incoming().unwrap();
 
-        let parsed = RequestParser::parse(&buf)
-                .unwrap();
-
-        let content = match pages_list.get(parsed.path) {
-            Some(func) => func(parsed),
+        let content = match pages_list.get(&parsed.path) {
+            Some(func) => func(&parsed),
             None => "PAGE NOT FOUND".to_string()
         };
 
@@ -79,6 +83,6 @@ impl HttpServer {
                 .set_content(&content)
                 .build();
 
-        connection.write_buf(resp.as_bytes());
+        connection.write_buf(resp.as_bytes()).unwrap();
     }
 }

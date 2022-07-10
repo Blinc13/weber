@@ -24,16 +24,17 @@ use crate::parser::request::Method;
 ///assert_eq!(parsed.method, GET);
 ///assert_eq!(parsed.path, "/");
 ///```
-pub struct RequestParser<'a> {
+pub struct RequestParser {
     pub method: Method,
-    pub path: &'a str,
+    pub path: String,
     pub version: u8,
 
-    pub headers: HashMap<&'a str, &'a [u8]>,
+    pub headers: HashMap<String, Vec<u8>>,
+    pub content: Option<Vec<u8>>
 }
 
-impl<'a> RequestParser<'a> {
-    pub fn parse(content: &'a [u8]) -> Result<Self, Error> {
+impl RequestParser {
+    pub fn parse(content: &[u8]) -> Result<Self, Error> {
         let mut buf = [EMPTY_HEADER; 16];
         let mut request = Request::new(&mut buf);
 
@@ -41,14 +42,14 @@ impl<'a> RequestParser<'a> {
 
         let method_str = request.method.unwrap();
         let version = request.version.unwrap();
-        let path = request.path.unwrap();
+        let path = request.path.unwrap().to_string();
 
         let mut headers = HashMap::new();
         let method: Method;
 
         {//Data representation operations
             for header in buf.iter() {
-                headers.insert(header.name, header.value);
+                headers.insert(header.name.to_string(), header.value.to_vec());
             }
 
             method = method_str.parse().unwrap();
@@ -60,6 +61,7 @@ impl<'a> RequestParser<'a> {
             version,
 
             headers,
+            content: None
         })
     }
 }
