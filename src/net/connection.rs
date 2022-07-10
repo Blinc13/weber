@@ -1,4 +1,3 @@
-//TODO: Add normal error handling
 use std::io::{Read, Write, BufRead, BufReader};
 use std::net::TcpStream;
 use crate::{
