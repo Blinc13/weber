@@ -58,7 +58,7 @@ impl HttpServer {
     }
 
     pub fn run(mut self) {
-        let listener = Listener::new();
+        let listener = Listener::new().unwrap();
 
         let ptr = Arc::new(self.pages.take().unwrap());
 
@@ -80,9 +80,8 @@ impl HttpServer {
         };
 
         let resp = ResponseBuilder::new()
-                .set_content(&content)
-                .build();
+                .set_content(&content);
 
-        connection.write_buf(resp.as_bytes()).unwrap();
+        connection.write_builder(resp).unwrap();
     }
 }

@@ -1,14 +1,19 @@
 use std::net::TcpListener;
-use crate::net::Connection;
+use crate::net::{
+    Error,
+    Result,
+    Connection
+};
 
 pub struct Listener {
     listener: TcpListener
 }
 
 impl Listener {
-    pub fn new() -> Self {
-        Self {
-            listener: TcpListener::bind("127.0.0.1:7080").unwrap()
+    pub fn new() -> Result<Self> {
+        match TcpListener::bind("127.0.0.1:7080") {
+            Ok(listener) => Ok( Self{ listener } ),
+            Err(_) => return Err(Error::ConnectionError)
         }
     }
 

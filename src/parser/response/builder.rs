@@ -1,9 +1,8 @@
 //TODO: If possible, reconsider the solution with the content field
 
-use crate::parser::Header;
-use std::{
-    io::{Result, Write},
-    net::TcpStream,
+use crate::parser::{
+    Header,
+    Builder
 };
 
 ///This structure describes the request builder
@@ -62,14 +61,6 @@ impl<'a> ResponseBuilder<'a> {
         self
     }
 
-    pub fn build(self) -> String {
-        self.format()
-    }
-
-    pub fn send(self, stream: &mut TcpStream) -> Result<usize> {
-        stream.write(self.build().as_bytes())
-    }
-
     fn format(&self) -> String {
         let header: String = self
             .headers
@@ -81,5 +72,11 @@ impl<'a> ResponseBuilder<'a> {
             "HTTP/1.{} {} {}\r\n{}\r\n{}\r\n",
             self.version, self.code, self.reason, header, self.content
         )
+    }
+}
+
+impl Builder for ResponseBuilder<'_> {
+    fn build(self) -> String {
+        self.format()
     }
 }

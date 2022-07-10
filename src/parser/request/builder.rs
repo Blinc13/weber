@@ -1,10 +1,7 @@
 use crate::parser::{
     Header,
+    Builder,
     request::Method
-};
-use std::{
-    io::{Result as IoRes, Write},
-    net::TcpStream,
 };
 
 ///This structure describes the request builder
@@ -93,15 +90,6 @@ impl<'a> RequestBuilder<'a> {
         }
     }
 
-    pub fn build(self) -> String {
-        self.format()
-    }
-
-    ///Consumes a builder and writes it to the passed stream
-    pub fn send(self, stream: &mut TcpStream) -> IoRes<usize> {
-        stream.write(self.build().as_bytes())
-    }
-
     fn format(&self) -> String {
         let headers: String = self
             .headers
@@ -113,5 +101,11 @@ impl<'a> RequestBuilder<'a> {
             "{} {} HTTP/1.{}\r\n{}\r\n",
             self.method, self.path, self.version, headers
         )
+    }
+}
+
+impl Builder for RequestBuilder<'_> {
+    fn build(self) -> String {
+        self.format()
     }
 }
