@@ -6,3 +6,12 @@ pub mod response;
 mod header;
 mod builder;
 
+#[derive(Debug)]
+pub enum Error {
+    InvalidFormat,
+    StatusCode,
+    Version,
+    Reason,
+    Method,
+    Path
+}

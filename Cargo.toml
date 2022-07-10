@@ -9,4 +9,3 @@ authors = ["Blinc <https://github.com/Blinc13>"]
 [dependencies]
 threadpool = "1.8.1"
 httparse = "1.7.1"
-buffer = "0.1.9"

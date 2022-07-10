@@ -1,4 +1,10 @@
-use weber::parser::response::{builder::ResponseBuilder, parser::ResponseParser};
+use weber::parser::{
+    Builder,
+    response::{
+        builder::ResponseBuilder,
+        parser::ResponseParser
+    }
+};
 
 #[test]
 fn response_builder_test() {
@@ -15,7 +21,7 @@ fn response_builder_test() {
     let parsed = ResponseParser::parse(response.as_bytes()); // Parsing the response
     let parsed = parsed.unwrap(); // Unwrap the parsed response
 
-    assert_eq!(parsed.code, 200);
+    assert_eq!(parsed.status_code, 200);
     assert_eq!(parsed.version, 1);
     assert_eq!(parsed.reason.unwrap(), reason);
 }

@@ -9,9 +9,12 @@ use crate::parser::{
 ///It's easier to see than to describe
 ///# Example
 ///```
-///use weber::parser::request::{
-///    builder::RequestBuilder,
-///    Method::GET
+///use weber::parser::{
+///    Builder,
+///    request::{
+///        builder::RequestBuilder,
+///        Method::GET
+///    }
 ///};
 ///
 ///let builded_string = RequestBuilder::new()

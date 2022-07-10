@@ -1,6 +1,6 @@
+use httparse::{Response, EMPTY_HEADER};
 use std::collections::HashMap;
-
-use httparse::{Error, Response, EMPTY_HEADER};
+use crate::parser::Error;
 
 
 ///This structure describes the parsed response
@@ -9,7 +9,7 @@ use httparse::{Error, Response, EMPTY_HEADER};
 ///weber::parser::request::parser::RequestParser
 pub struct ResponseParser {
     pub version: u8,
-    pub code: u16,
+    pub status_code: u16,
 
     pub reason: Option<String>,
     pub headers: HashMap<String, Vec<u8>>,
@@ -20,10 +20,18 @@ impl ResponseParser {
         let mut buf = [EMPTY_HEADER; 16];
         let mut response = Response::new(&mut buf);
 
-        response.parse(&content)?;
+        if let Err(_) = response.parse(content) {
+            return Err(Error::InvalidFormat);
+        }
 
-        let version = response.version.unwrap();
-        let code = response.code.unwrap();
+        let version = match response.version {
+            None => return Err(Error::Version),
+            Some(i) => i
+        };
+        let status_code = match response.code {
+            None => return Err(Error::StatusCode),
+            Some(i) => i
+        };
         let reason = response.reason.map(|s| s.to_string());
 
         let mut headers = HashMap::new();
@@ -34,7 +42,7 @@ impl ResponseParser {
 
         Ok(Self {
             version,
-            code,
+            status_code,
             reason,
             headers,
         })

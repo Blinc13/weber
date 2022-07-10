@@ -1,8 +1,11 @@
-use weber::parser::request::{
-    parser::RequestParser,
-    builder::RequestBuilder,
+use weber::parser::{
+    Builder,
+    request::{
+        parser::RequestParser,
+        builder::RequestBuilder,
 
-    Method::*
+        Method::*
+    }
 };
 
 #[test]

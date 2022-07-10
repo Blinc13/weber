@@ -1,17 +1,23 @@
-use httparse::{Error, Request, EMPTY_HEADER};
+use httparse::{Request, EMPTY_HEADER};
 use std::collections::HashMap;
-use crate::parser::request::Method;
+use crate::parser::{
+    Error,
+    request::Method
+};
 
 ///This structure describes the parsed HTTP request
 ///
 ///All structure fields are public, access them directly
 ///# Example
 ///```
-///use weber::parser::request::{
-///    parser::RequestParser,
-///    builder::RequestBuilder,
+///use weber::parser::{
+///    Builder,
+///    request::{
+///        parser::RequestParser,
+///        builder::RequestBuilder,
 ///
-///    Method::GET
+///        Method::GET
+///    },
 ///};
 ///
 ///let request = RequestBuilder::new()
@@ -38,11 +44,22 @@ impl RequestParser {
         let mut buf = [EMPTY_HEADER; 16];
         let mut request = Request::new(&mut buf);
 
-        request.parse(content)?;
+        if let Err(_) = request.parse(content) {
+            return Err(Error::InvalidFormat);
+        }
 
-        let method_str = request.method.unwrap();
-        let version = request.version.unwrap();
-        let path = request.path.unwrap().to_string();
+        let method_str = match request.method {
+            None => return Err(Error::Method),
+            Some(i) => i
+        };
+        let version = match request.version {
+            None => return Err(Error::Version),
+            Some(i) => i
+        };
+        let path = match request.path {
+            None => return Err(Error::Path),
+            Some(i) => i.to_string()
+        };
 
         let mut headers = HashMap::new();
         let method: Method;
@@ -52,7 +69,10 @@ impl RequestParser {
                 headers.insert(header.name.to_string(), header.value.to_vec());
             }
 
-            method = method_str.parse().unwrap();
+            method = match method_str.parse() {
+                Ok(i) => i,
+                Err(_) => return Err(Error::Method)
+            };
         }
 
         Ok(Self {
