@@ -3,12 +3,10 @@ use std::net::TcpStream;
 use crate::{
     net::{
         Error,
-        Result
+        Result,
+        HttpData
     },
-    parser::{
-        Builder,
-        request::parser::RequestParser
-    }
+    parser::Builder
 };
 
 const CAPACITY: usize = 512;
@@ -36,10 +34,11 @@ impl Connection {
         Ok(Self::new(stream))
     }
 
-    pub fn parse_incoming(&mut self) -> Result<RequestParser> {
+    pub fn parse_incoming(&mut self) -> Result<HttpData> {
         if self.readed {
             return Err(Error::UnableToRead);
         } // If stream is already readed, return Err::BadRequest
+
 
         // Create buffers. vec has a minimum size to allocate for optimization
         let mut buf = BufReader::new(self.stream.take().unwrap());
@@ -51,12 +50,15 @@ impl Connection {
             }
         } // Read until \r\n
 
-        let mut parsed = match RequestParser::parse(&vec) {
+
+        let mut parsed = match HttpData::parse(&vec) {
             Ok(parsed) => parsed,
             Err(_) => return Err(Error::BadRequest)
         }; // Parse the request, if failed, return Err::BadRequest
 
-        parsed.content = match parsed.headers.get("Content-Length") {
+
+        let headers = parsed.headers();
+        parsed.set_content(match headers.get("Content-Length") {
             Some(lenght) => {
                 let lenght: usize = String::from_utf8_lossy(lenght).parse().unwrap();
 
@@ -72,7 +74,8 @@ impl Connection {
             None => {
                 None
             }
-        }; // If we have content fields, read the content
+        }); // If we have content fields, read the content
+
 
         self.stream = Some(buf.into_inner());
 
@@ -97,5 +100,14 @@ impl Connection {
         self.stream = Some(stream);
 
         Ok(())
+    }
+}
+
+impl HttpData {
+    fn set_content(&mut self, content: Option<Vec<u8>>) {
+        match self {
+            HttpData::Request(parsed) => parsed.content = content,
+            HttpData::Response(parsed) => parsed.content = content
+        }
     }
 }

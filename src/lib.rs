@@ -1,3 +1,5 @@
+extern crate core;
+
 pub use server::HttpServer;
 
 pub mod parser;

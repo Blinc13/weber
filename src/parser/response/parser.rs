@@ -13,6 +13,7 @@ pub struct ResponseParser {
 
     pub reason: Option<String>,
     pub headers: HashMap<String, Vec<u8>>,
+    pub content: Option<Vec<u8>>
 }
 
 impl ResponseParser {
@@ -45,6 +46,7 @@ impl ResponseParser {
             status_code,
             reason,
             headers,
+            content: None
         })
     }
 }

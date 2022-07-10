@@ -6,6 +6,8 @@ pub mod response;
 mod header;
 mod builder;
 
+pub type Result<T> = std::result::Result<T, Error>;
+
 #[derive(Debug)]
 pub enum Error {
     InvalidFormat,

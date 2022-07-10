@@ -72,7 +72,7 @@ impl HttpServer {
     }
 
     fn response(mut connection: Connection, pages_list: Arc<Pages>) {
-        let parsed = connection.parse_incoming().unwrap();
+        let parsed = connection.parse_incoming().unwrap().as_request();
 
         let content = match pages_list.get(&parsed.path) {
             Some(func) => func(&parsed),
