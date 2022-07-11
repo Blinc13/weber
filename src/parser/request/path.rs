@@ -41,6 +41,10 @@ impl PathParser {
 
         let parts: Vec<_> = path.split(':').collect();
 
+        if parts.len() > 2 {
+            return Err(Error::InvalidFormat);
+        }
+
         let path = parts[0].to_string();
         let values = match parts.get(1) {
             Some(s) => {

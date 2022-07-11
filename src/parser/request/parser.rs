@@ -31,7 +31,7 @@ use crate::parser::{
 ///        .unwrap();
 ///
 ///assert_eq!(parsed.method, GET);
-///assert_eq!(parsed.path, "/");
+///assert_eq!(parsed.path.path, "/");
 ///```
 pub struct RequestParser {
     pub method: Method,

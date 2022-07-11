@@ -23,6 +23,6 @@ fn request_builder_test() {
     let parsed = parsed.unwrap();
 
     assert_eq!(parsed.method, GET);
-    assert_eq!(parsed.path, "/foo/bar");
+    assert_eq!(parsed.path.path, "/foo/bar");
     assert_eq!(parsed.version, 1);
 }
