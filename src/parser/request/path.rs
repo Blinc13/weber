@@ -26,8 +26,9 @@ use crate::parser::{Result, Error};
 ///
 ///assert_eq!(vals["name"], "test");
 ///assert_eq!(vals["test"], "name");
-///assert_eq!(parsed.path, "/path/to/foo");
+///assert_eq!(parsed, "/path/to/foo");
 ///```
+#[derive(Debug)]
 pub struct PathParser {
     pub path: String,
     pub values: Option<HashMap<String, String>>
@@ -73,5 +74,17 @@ impl PathParser {
         };
 
         Ok(Self { path, values })
+    }
+}
+
+impl PartialEq for PathParser {
+    fn eq(&self, other: &Self) -> bool {
+        self.path == other.path
+    }
+}
+
+impl PartialEq<&str> for PathParser {
+    fn eq(&self, other: &&str) -> bool {
+        self.path == *other
     }
 }
