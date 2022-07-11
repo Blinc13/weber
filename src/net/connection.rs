@@ -11,6 +11,9 @@ use crate::{
 
 const CAPACITY: usize = 512;
 
+///Simplified connection
+///
+///Has the most simplified methods for communication
 pub struct Connection {
     stream: Option<TcpStream>,
 

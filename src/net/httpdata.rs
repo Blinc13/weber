@@ -6,6 +6,13 @@ use crate::parser::{
     response::parser::ResponseParser
 };
 
+///Enum contains either a request / or a response
+///
+///> **Created to be able to return not only a request,
+///    but also a response from a Connection::Parse_incoming**
+///
+///# Remark
+///The methods in this enum are **VERY unoptimized**
 pub enum HttpData {
     Request(RequestParser),
     Response(ResponseParser)

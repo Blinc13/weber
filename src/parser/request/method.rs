@@ -5,6 +5,15 @@ use std::{
     cmp::PartialEq
 };
 
+
+///This struct describes request method
+///
+///# Possible states
+///- GET
+///- POST
+///# Remark
+///1. Structure can be parsed from string
+///2. Structure can be displayed on standard output
 #[derive(Debug, PartialEq)]
 pub enum Method {
     GET,

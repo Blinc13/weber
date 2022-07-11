@@ -5,6 +5,10 @@ use crate::net::{
     Connection
 };
 
+///Wrapper over TcpListener from std
+///
+///Created to reduce the code in
+///server.rs and make it reusable
 pub struct Listener {
     listener: TcpListener
 }
@@ -23,7 +27,9 @@ impl Listener {
 }
 
 
-
+///Iterator over incoming connections
+///
+///Returns **ONLY** successful connections wrapped in Connection
 pub struct ConnectionIter<'a> {
     iter: std::net::Incoming<'a>
 }

@@ -1,5 +1,8 @@
 use std::fmt::Display;
 
+///Describes header
+///
+///Used in builders, not to use a lot of memory
 pub struct Header<'a> {
     pub key: &'a str,
     pub value: &'a str,

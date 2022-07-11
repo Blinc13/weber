@@ -1,3 +1,5 @@
+//!This module contains methods for parsing and building request
+
 pub use method::Method;
 pub use path::PathParser;
 
