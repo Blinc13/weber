@@ -22,5 +22,5 @@ fn httpdata_panic_test() {
     let resp = ResponseBuilder::new().build();
 
     let parsed = HttpData::parse(resp.as_bytes()).unwrap();
-    let parsed = parsed.as_request();
+    let _parsed = parsed.as_request();
 }

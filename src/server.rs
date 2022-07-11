@@ -73,8 +73,9 @@ impl HttpServer {
 
     fn response(mut connection: Connection, pages_list: Arc<Pages>) {
         let parsed = connection.parse_incoming().unwrap().as_request();
+        let parsed_path = &parsed.path;
 
-        let content = match pages_list.get(&parsed.path) {
+        let content = match pages_list.get(&parsed_path.path) {
             Some(func) => func(&parsed),
             None => "PAGE NOT FOUND".to_string()
         };

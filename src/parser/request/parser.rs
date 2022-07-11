@@ -2,7 +2,10 @@ use httparse::{Request, EMPTY_HEADER};
 use std::collections::HashMap;
 use crate::parser::{
     Error,
-    request::Method
+    request::{
+        Method,
+        PathParser
+    }
 };
 
 ///This structure describes the parsed HTTP request
@@ -32,7 +35,7 @@ use crate::parser::{
 ///```
 pub struct RequestParser {
     pub method: Method,
-    pub path: String,
+    pub path: PathParser,
     pub version: u8,
 
     pub headers: HashMap<String, Vec<u8>>,
@@ -58,7 +61,7 @@ impl RequestParser {
         };
         let path = match request.path {
             None => return Err(Error::Path),
-            Some(i) => i.to_string()
+            Some(i) => PathParser::parse(i)?
         };
 
         let mut headers = HashMap::new();
