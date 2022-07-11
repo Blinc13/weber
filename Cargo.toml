@@ -1,7 +1,15 @@
 [package]
 name = "weber"
+description = "Simple web server with VERY limited functionality"
+keywords = ["weber", "server", "web"]
+
+repository = "https://github.com/Blinc13/weber"
 version = "0.1.0"
 edition = "2021"
+
+license = "GPL-3.0"
+license-file = "LICENSE"
+
 authors = ["Blinc <https://github.com/Blinc13>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
