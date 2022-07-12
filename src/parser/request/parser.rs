@@ -27,7 +27,7 @@ use crate::parser::{
 ///        .set_header("Example", "test")
 ///        .build();
 ///
-///let parsed = RequestParser::parse(request.as_bytes())
+///let parsed = RequestParser::parse(&request)
 ///        .unwrap();
 ///
 ///assert_eq!(parsed.method, GET);

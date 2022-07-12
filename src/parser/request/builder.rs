@@ -13,6 +13,7 @@ use crate::parser::{
 ///    Builder,
 ///    request::{
 ///        builder::RequestBuilder,
+///        parser::RequestParser,
 ///        Method::GET
 ///    }
 ///};
@@ -22,9 +23,13 @@ use crate::parser::{
 ///        .set_method(GET)
 ///        .set_path("/foo/bar")
 ///        .set_header("Test", "Example")
-///        .build();
+///        .build(); // build return vector of u8
 ///
-///println!("{}", builded_string);
+///let parsed = RequestParser::parse(&builded_string).unwrap();
+///
+///assert_eq!(parsed.path, "/foo/bar");
+///assert_eq!(parsed.method, GET);
+///assert_eq!(parsed.version, 1);
 ///```
 ///# PS
 ///All structure fields are public,
@@ -33,7 +38,7 @@ use crate::parser::{
 ///```
 ///use weber::parser::request::builder::RequestBuilder;
 ///
-///let builder = RequestBuilder::new().set_content("abc");
+///let builder = RequestBuilder::new().set_content("abc".as_bytes(), "text");
 ///
 ///assert!(builder.is_err());
 ///```
@@ -43,7 +48,7 @@ pub struct RequestBuilder<'a> {
     pub version: u8,
 
     pub headers: Vec<Header<'a>>,
-    content: Option<&'a str>
+    content: Option<&'a [u8]>
 }
 
 impl<'a> RequestBuilder<'a> {
@@ -83,8 +88,10 @@ impl<'a> RequestBuilder<'a> {
         self
     }
 
-    pub fn set_content(mut self, content: &'a str) -> Result<Self, ()> {
+    pub fn set_content(mut self, content: &'a [u8], content_type: &'a str) -> Result<Self, ()> {
         if let Method::POST = self.method {
+            self = self.set_header("Content-Type", content_type);
+
             self.content = Some(content);
 
             Ok(self)
@@ -94,11 +101,22 @@ impl<'a> RequestBuilder<'a> {
     }
 
     fn format(&self) -> String {
-        let headers: String = self
+        let mut headers: String = self
             .headers
             .iter()
             .map(|header| header.to_string() + "\r\n")
             .collect();
+
+        match self.content {
+            Some(i) => {
+                let len = i.len().to_string();
+
+                headers = headers +
+                    &Header::new("Content-Length", &len).to_string()
+                    + "\r\n";
+            }
+            None => {}
+        };
 
         format!(
             "{} {} HTTP/1.{}\r\n{}\r\n",
@@ -108,7 +126,13 @@ impl<'a> RequestBuilder<'a> {
 }
 
 impl Builder for RequestBuilder<'_> {
-    fn build(self) -> String {
-        self.format()
+    fn build(self) -> Vec<u8> {
+        let mut res = self.format().as_bytes().to_vec();
+
+        if let Some(content) = self.content {
+            res.append(&mut content.to_vec());
+        }
+
+        res
     }
 }

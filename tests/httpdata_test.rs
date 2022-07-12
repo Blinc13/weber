@@ -10,7 +10,7 @@ use weber::{
 fn httpdata_test() {
     let resp = ResponseBuilder::new().build();
 
-    let parsed = HttpData::parse(resp.as_bytes()).unwrap();
+    let parsed = HttpData::parse(&resp).unwrap();
     let parsed = parsed.as_response();
 
     assert_eq!(parsed.status_code, 200);
@@ -21,6 +21,6 @@ fn httpdata_test() {
 fn httpdata_panic_test() {
     let resp = ResponseBuilder::new().build();
 
-    let parsed = HttpData::parse(resp.as_bytes()).unwrap();
+    let parsed = HttpData::parse(&resp).unwrap();
     let _parsed = parsed.as_request();
 }

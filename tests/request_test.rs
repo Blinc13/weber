@@ -19,7 +19,7 @@ fn request_builder_test() {
 
     println!("{:?}", builded);
 
-    let parsed = RequestParser::parse(builded.as_bytes());
+    let parsed = RequestParser::parse(&builded);
     let parsed = parsed.unwrap();
 
     assert_eq!(parsed.method, GET);

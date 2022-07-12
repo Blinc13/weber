@@ -1,5 +1,3 @@
-//TODO: If possible, reconsider the solution with the content field
-
 use crate::parser::{
     Header,
     Builder
@@ -15,7 +13,7 @@ pub struct ResponseBuilder<'a> {
 
     pub reason: &'a str,
     pub headers: Vec<Header<'a>>,
-    pub content: &'a str
+    content: Option<&'a [u8]>
 }
 
 impl<'a> ResponseBuilder<'a> {
@@ -26,7 +24,7 @@ impl<'a> ResponseBuilder<'a> {
 
             reason: "OK",
             headers: Vec::new(),
-            content: ""
+            content: None
         }
     }
 
@@ -48,8 +46,11 @@ impl<'a> ResponseBuilder<'a> {
         self
     }
 
-    pub fn set_content(mut self, content: &'a str) -> Self {
-        self.content = content;
+    pub fn set_content(mut self, content: &'a [u8], content_type: &'a str) -> Self {
+        self = self
+            .set_header("Content-Type", content_type);
+
+        self.content = Some(content);
 
         self
     }
@@ -62,21 +63,37 @@ impl<'a> ResponseBuilder<'a> {
     }
 
     fn format(&self) -> String {
-        let header: String = self
-            .headers
+        let mut header: String = self.headers
             .iter()
-            .map(|header| header.to_string() + "\n")
+            .map(|header| header.to_string() + "\r\n")
             .collect();
 
+        match self.content {
+            Some(content) => {
+                let len = content.len().to_string();
+
+                header = header +
+                    &Header::new("Content-Length", &len).to_string()
+                    + "\r\n";
+            }
+            None => {}
+        }
+
         format!(
-            "HTTP/1.{} {} {}\r\n{}\r\n{}\r\n",
-            self.version, self.code, self.reason, header, self.content
+            "HTTP/1.{} {} {}\r\n{}\r\n",
+            self.version, self.code, self.reason, header
         )
     }
 }
 
 impl Builder for ResponseBuilder<'_> {
-    fn build(self) -> String {
-        self.format()
+    fn build(self) -> Vec<u8> {
+        let mut res = self.format().as_bytes().to_vec();
+
+        if let Some(content) = self.content {
+            res.append(&mut content.to_vec());
+        }
+
+        res
     }
 }

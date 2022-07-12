@@ -81,7 +81,7 @@ impl HttpServer {
         };
 
         let resp = ResponseBuilder::new()
-                .set_content(&content);
+                .set_content(content.as_bytes(), "text/html");
 
         connection.write_builder(resp).unwrap();
     }

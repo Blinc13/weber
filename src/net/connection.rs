@@ -91,7 +91,7 @@ impl Connection {
         let mut stream = self.stream.take().unwrap();
         let response = response.build(); // Build the response
 
-        if let Err(e) = stream.write_all(response.as_bytes()) {
+        if let Err(e) = stream.write_all(&response) {
             return match e.kind() {
                 std::io::ErrorKind::ConnectionAborted => Err(Error::ConnectionLost),
                 _ => Err(Error::ConnectionError)
