@@ -58,8 +58,8 @@ impl HttpServer {
         });
     }
 
-    pub fn run(mut self) {
-        let listener = Listener::new().unwrap();
+    pub fn run(mut self, ip: &str) {
+        let listener = Listener::new(ip).unwrap();
 
         let ptr = Arc::new(self.pages.take().unwrap());
 

@@ -14,8 +14,8 @@ pub struct Listener {
 }
 
 impl Listener {
-    pub fn new() -> Result<Self> {
-        match TcpListener::bind("127.0.0.1:7080") {
+    pub fn new(ip: &str) -> Result<Self> {
+        match TcpListener::bind(ip) {
             Ok(listener) => Ok( Self{ listener } ),
             Err(_) => return Err(Error::ConnectionError)
         }

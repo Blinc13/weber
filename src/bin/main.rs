@@ -37,5 +37,5 @@ fn main() {
         ", foo, bar)
     });
 
-    server.run();
+    server.run("127.0.0.1:7080");
 }
