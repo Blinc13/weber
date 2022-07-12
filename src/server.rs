@@ -1,6 +1,7 @@
 //TODO: Refactor this
 
 use crate::parser::{
+    ContentType,
     request::parser::RequestParser,
     response::builder::ResponseBuilder
 };
@@ -81,7 +82,7 @@ impl HttpServer {
         };
 
         let resp = ResponseBuilder::new()
-                .set_content(content.as_bytes(), "text/html");
+                .set_content(content.as_bytes(), ContentType::Html);
 
         connection.write_builder(resp).unwrap();
     }
