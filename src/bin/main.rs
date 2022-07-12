@@ -2,8 +2,10 @@ use std::collections::HashMap;
 use weber::HttpServer;
 
 fn main() {
+    // Building a server that runs in 4 threads
     let mut server = HttpServer::new(4);
 
+    // Creating map with default values
     let mut default = HashMap::new();
 
     default.insert("foo".to_string(), "gg".to_string());
@@ -12,6 +14,7 @@ fn main() {
     server.add_page("/".to_string(),move | request | {
         let vals = request.path.values.as_ref().unwrap_or(&default);
 
+        // Getting values from url
         let foo = match vals.get("foo") {
             None => "Variable not defined",
             Some(foo) => foo
@@ -34,8 +37,8 @@ fn main() {
                 <a href=\"/:foo=bar,bar=foo\">Some page</a>
             </body>
         </html>
-        ", foo, bar)
+        ", foo, bar) // Format html using received values
     });
 
-    server.run("127.0.0.1:7080");
+    server.run("127.0.0.1:7080"); // Run server on localhost:7080
 }
