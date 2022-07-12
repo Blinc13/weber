@@ -1,5 +1,6 @@
 [package]
 name = "weber"
+readme = "README.md"
 description = "Simple web server with VERY limited functionality"
 keywords = ["weber", "server", "web"]
 
