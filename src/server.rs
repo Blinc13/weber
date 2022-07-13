@@ -51,6 +51,7 @@ impl HttpServer {
         }
     }
 
+    ///Adds a page handler, see the [**README.md**](https://github.com/Blinc13/weber/blob/master/README.md) for an example
     pub fn add_page<T>(&mut self, page: &str, func: T)
     where T: Fn(&RequestParser) -> Content + Sync + Send + 'static,
     {
@@ -59,12 +60,29 @@ impl HttpServer {
         self.pages.as_mut().unwrap().insert(page.to_string(), func);
     }
 
+    ///Sets an invalid url handler.
+    ///
+    ///# When is it called?
+    ///> When there is no page handler
     pub fn set_notfound_handler<T>(&mut self, func: T)
     where T: Fn(&RequestParser) -> Content + Sync + Send + 'static
     {
         self.notfound_handler = Box::new(func);
     }
 
+    ///Adds a page with the specified resource
+    ///
+    ///# Example
+    ///```
+    ///use weber::{
+    ///    HttpServer,
+    ///    parser::ContentType
+    ///};
+    ///
+    ///let mut server = HttpServer::new(1);
+    ///
+    ///server.add_resource("/favicon.ico", "some_image", ContentType::Ico);
+    ///```
     pub fn add_resource(&mut self, page: &str, resource: &'static str, r#type: ContentType) {
         self.add_page(page, move | _ | {
             let mut file = std::fs::File::open(resource).unwrap();
@@ -76,6 +94,9 @@ impl HttpServer {
         });
     }
 
+    ///Starts the server on the given ip and port
+    ///
+    ///See [**README.md**](https://github.com/Blinc13/weber/blob/master/README.md) for an example.
     pub fn run(mut self, ip: &str) {
         let listener = Listener::new(ip).unwrap();
 
