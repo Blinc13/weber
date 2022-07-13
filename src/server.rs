@@ -6,7 +6,7 @@ use crate::net::{
     Connection
 };
 
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, sync::Arc, io::Read};
 use threadpool::ThreadPool;
 
 type Page = Box<dyn Fn(&RequestParser) -> Content + Sync + Send>;
@@ -22,7 +22,7 @@ type Pages = HashMap<String, Page>;
 ///use weber::parser::{Content, ContentType};
 ///let mut server = weber::HttpServer::new(1);
 ///
-///server.add_page("/".to_string(), | _ | {
+///server.add_page("/", | _ | {
 ///    Content::new("Some html!".as_bytes().to_vec(), ContentType::Html)
 ///});
 ///```
@@ -40,21 +40,23 @@ impl HttpServer {
     }
 
     ///Adds a closure associated with the page
-    pub fn add_page<T>(&mut self, page: String, func: T)
+    pub fn add_page<T>(&mut self, page: &str, func: T)
     where
         T: Fn(&RequestParser) -> Content + Sync + Send + 'static,
     {
         let func = Box::new(func);
 
-        self.pages.as_mut().unwrap().insert(page, func);
+        self.pages.as_mut().unwrap().insert(page.to_string(), func);
     }
 
-    pub fn add_resource(&mut self,page: String, resource: &'static str) {
+    pub fn add_resource(&mut self, page: &str, resource: &'static str, r#type: ContentType) {
         self.add_page(page, move | _ | {
-            let content = std::fs::read_to_string(resource).unwrap()
-                .as_bytes().to_vec();
+            let mut file = std::fs::File::open(resource).unwrap();
+            let mut content= Vec::new();
 
-            Content::new(content, ContentType::Html)
+            file.read_to_end(&mut content).unwrap();
+
+            Content::new(content, r#type)
         });
     }
 

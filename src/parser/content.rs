@@ -41,3 +41,11 @@ impl Display for ContentType {
         write!(f, "{}", s)
     }
 }
+
+impl Clone for ContentType {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl Copy for ContentType {}
