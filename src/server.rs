@@ -1,10 +1,6 @@
 //TODO: Refactor this
 
-use crate::parser::{
-    ContentType,
-    request::parser::RequestParser,
-    response::builder::ResponseBuilder
-};
+use crate::parser::{Content, ContentType, request::parser::RequestParser, response::builder::ResponseBuilder};
 use crate::net::{
     Listener,
     Connection
@@ -13,7 +9,7 @@ use crate::net::{
 use std::{collections::HashMap, sync::Arc};
 use threadpool::ThreadPool;
 
-type Page = Box<dyn Fn(&RequestParser) -> String + Sync + Send>;
+type Page = Box<dyn Fn(&RequestParser) -> Content + Sync + Send>;
 type Pages = HashMap<String, Page>;
 
 ///# HttpServer struct.
@@ -23,10 +19,11 @@ type Pages = HashMap<String, Page>;
 ///
 ///# Example
 ///```
+///use weber::parser::{Content, ContentType};
 ///let mut server = weber::HttpServer::new(1);
 ///
 ///server.add_page("/".to_string(), | _ | {
-///   "some_page".to_string()
+///    Content::new("Some html!".as_bytes().to_vec(), ContentType::Html)
 ///});
 ///```
 pub struct HttpServer {
@@ -45,7 +42,7 @@ impl HttpServer {
     ///Adds a closure associated with the page
     pub fn add_page<T>(&mut self, page: String, func: T)
     where
-        T: Fn(&RequestParser) -> String + Sync + Send + 'static,
+        T: Fn(&RequestParser) -> Content + Sync + Send + 'static,
     {
         let func = Box::new(func);
 
@@ -54,7 +51,10 @@ impl HttpServer {
 
     pub fn add_resource(&mut self,page: String, resource: &'static str) {
         self.add_page(page, move | _ | {
-            std::fs::read_to_string(resource).unwrap()
+            let content = std::fs::read_to_string(resource).unwrap()
+                .as_bytes().to_vec();
+
+            Content::new(content, ContentType::Html)
         });
     }
 
@@ -78,11 +78,11 @@ impl HttpServer {
 
         let content = match pages_list.get(&parsed_path.path) {
             Some(func) => func(&parsed),
-            None => "PAGE NOT FOUND".to_string()
+            None => Content::new("PAGE NOT FOUND".as_bytes().to_vec(), ContentType::Html)
         };
 
         let resp = ResponseBuilder::new()
-                .set_content(content.as_bytes(), ContentType::Html);
+                .set_content(&content.content, content.r#type);
 
         connection.write_builder(resp).unwrap();
     }

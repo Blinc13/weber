@@ -1,6 +1,20 @@
 use std::fmt::{Formatter, Display};
 use ContentType::*;
 
+pub struct Content {
+    pub content: Vec<u8>,
+    pub r#type: ContentType
+}
+
+impl Content {
+    pub fn new(content: Vec<u8>, r#type: ContentType) -> Self {
+        Self {
+            content,
+            r#type
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum ContentType {
     Html,

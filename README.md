@@ -4,7 +4,13 @@
 # Example
 ```rust
 use std::collections::HashMap;
-use weber::HttpServer;
+use weber::{
+    HttpServer,
+    parser::{
+        Content,
+        ContentType
+    }
+};
 
 fn main() {
     // Building a server that runs in 4 threads
@@ -30,19 +36,23 @@ fn main() {
             Some(bar) => bar
         };
 
-        format!("<!DOCTYPE html>
-        <html>
-            <head>
-                <h1>Hello world!</h1>
-            </head>
-            <body>
-                <h3>Foo: {}</h3>
-                <h3>Bar: {}</h3>
+        let html = format!(
+            "<!DOCTYPE html>
+            <html>
+                <head>
+                    <h1>Hello world!</h1>
+                </head>
+                <body>
+                    <h3>Foo: {}</h3>
+                    <h3>Bar: {}</h3>
 
-                <a href=\"/:foo=bar,bar=foo\">Some page</a>
-            </body>
-        </html>
-        ", foo, bar) // Format html using received values
+                    <a href=\"/:foo=bar,bar=foo\">Some page</a>
+                </body>
+            </html>
+        ", foo, bar); // Format html using received values
+        
+        // Returning content
+        Content::new(html.as_bytes().to_vec(), ContentType::Html)
     });
 
     server.run("127.0.0.1:7080"); // Run server on localhost:7080

@@ -2,7 +2,7 @@
 
 pub use header::Header;
 pub use builder::Builder;
-pub use content::ContentType;
+pub use content::{ContentType, Content};
 
 pub mod request;
 pub mod response;
