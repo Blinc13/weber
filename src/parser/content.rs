@@ -1,6 +1,9 @@
 use std::fmt::{Formatter, Display};
 use ContentType::*;
 
+///Structure for the content returned by the page
+///
+///From the example in the readme, you can already understand how to use
 pub struct Content {
     pub content: Vec<u8>,
     pub r#type: ContentType
@@ -15,6 +18,9 @@ impl Content {
     }
 }
 
+///Enumeration of content-type header values
+///
+///Just return what the content is
 #[derive(Debug)]
 pub enum ContentType {
     Html,
