@@ -19,11 +19,14 @@ pub type Result<T> = std::result::Result<T, Error>;
 ///- *BadRequest*
 ///     > The second party sent a request / response that cannot be parsed
 ///- *UnableToRead*
-///     > Ability to read request lost
+///     > Ability to read request / response lost
+///- *UnableToWrite*
+///     > Ability to write request / response lost
 #[derive(Debug)]
 pub enum Error {
     ConnectionLost,
     ConnectionError,
     BadRequest,
-    UnableToRead
+    UnableToRead,
+    UnableToWrite
 }

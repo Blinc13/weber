@@ -17,14 +17,16 @@ const CAPACITY: usize = 512;
 pub struct Connection {
     stream: Option<TcpStream>,
 
-    readed: bool
+    readed: bool,
+    writed: bool
 }
 
 impl Connection {
     pub fn new(stream: TcpStream) -> Self {
         Self {
             stream: Some(stream),
-            readed: false
+            readed: false,
+            writed: false
         }
     }
 
@@ -81,6 +83,7 @@ impl Connection {
 
 
         self.stream = Some(buf.into_inner());
+        self.readed = true;
 
         Ok(parsed)
     }
@@ -88,6 +91,10 @@ impl Connection {
     pub fn write_builder<T>(&mut self, response: T) -> Result<()>
         where T: Builder
     {
+        if self.writed {
+            return Err(Error::UnableToWrite);
+        }
+
         let mut stream = self.stream.take().unwrap();
         let response = response.build(); // Build the response
 
@@ -101,6 +108,7 @@ impl Connection {
         stream.flush().unwrap();
 
         self.stream = Some(stream);
+        self.writed = true;
 
         Ok(())
     }
