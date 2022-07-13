@@ -17,7 +17,7 @@ fn main() {
     default.insert("foo".to_string(), "gg".to_string());
     default.insert("bar".to_string(), "hi".to_string());
 
-    server.add_page("/",move | request | {
+    server.add_page("/", move | request | {
         let vals = request.path.values.as_ref().unwrap_or(&default);
 
         // Getting values from url

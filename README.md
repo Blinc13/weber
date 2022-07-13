@@ -1,4 +1,4 @@
-[<img src="https://crates.io/favicon.ico" width="50"/>](https://crates.io)
+[<img src="https://crates.io/favicon.ico" width="50"/>](https://crates.io/crates/weber)
 [<img src="https://github.githubassets.com/favicons/favicon-dark.svg" width="50"/>](https://github.com/Blinc13/weber)
 ---
 # Example
@@ -50,8 +50,7 @@ fn main() {
                 </body>
             </html>
         ", foo, bar); // Format html using received values
-        
-        // Returning content
+
         Content::new(html.as_bytes().to_vec(), ContentType::Html, 200)
     });
 
