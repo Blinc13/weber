@@ -1,4 +1,4 @@
-//TODO: Refactor this
+//!This module contains server structure
 
 use crate::{
     net::{

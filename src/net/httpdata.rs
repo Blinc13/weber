@@ -6,7 +6,7 @@ use crate::parser::{
     response::parser::ResponseParser
 };
 
-///Enum contains either a request / or a response
+///Enum contains parsed request or response
 ///
 ///> **Created to be able to return not only a request,
 ///    but also a response from a Connection::Parse_incoming**
@@ -50,6 +50,21 @@ impl HttpData {
         }
     }
 
+    ///*Consumes* a structure and if it is a **request** returns the result of the parser, if not - ***panic!***
+    ///
+    ///# Example
+    ///```
+    ///use weber::{
+    ///    net::HttpData,
+    ///    parser::{
+    ///        Builder,
+    ///        request::RequestBuilder
+    ///    }
+    ///};
+    ///
+    ///let parsed = HttpData::parse(&RequestBuilder::new().build());
+    ///let parsed = parsed.unwrap().as_request();
+    ///```
     pub fn as_request(self) -> RequestParser {
         match self {
             Self::Request(parsed) => parsed,
@@ -57,6 +72,21 @@ impl HttpData {
         }
     }
 
+    ///*Consumes* a structure and if it is a **response** returns the result of the parser, if not - ***panic!***
+    ///
+    ///# Example
+    ///```
+    ///use weber::{
+    ///    net::HttpData,
+    ///    parser::{
+    ///        Builder,
+    ///        response::ResponseBuilder
+    ///    }
+    ///};
+    ///
+    ///let parsed = HttpData::parse(&ResponseBuilder::new().build());
+    ///let parsed = parsed.unwrap().as_response();
+    ///```
     pub fn as_response(self) -> ResponseParser {
         match self {
             Self::Response(parsed) => parsed,

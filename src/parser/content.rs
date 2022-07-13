@@ -3,7 +3,7 @@ use ContentType::*;
 
 ///Structure for the content returned by the page
 ///
-///From the example in the readme, you can already understand how to use
+///From the example in the [**README.md**](https://github.com/Blinc13/weber/blob/master/README.md), you can already understand how to use
 pub struct Content {
     pub content: Vec<u8>,
     pub r#type: ContentType,

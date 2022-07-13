@@ -21,6 +21,7 @@ impl Listener {
         }
     }
 
+    ///Returns an iterator over incoming connections
     pub fn listen(&self) -> ConnectionIter {
         ConnectionIter::new(self.listener.incoming())
     }

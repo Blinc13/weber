@@ -22,6 +22,7 @@ pub struct Connection {
 }
 
 impl Connection {
+    ///Constructs a new Connection from TcpStream
     pub fn new(stream: TcpStream) -> Self {
         Self {
             stream: Some(stream),
@@ -30,6 +31,7 @@ impl Connection {
         }
     }
 
+    ///Makes a connection and returns a Connect if successful
     pub fn connect(ip: &str) -> Result<Connection> {
         let stream = match TcpStream::connect(ip) {
             Ok(stream) => stream,
@@ -39,6 +41,9 @@ impl Connection {
         Ok(Self::new(stream))
     }
 
+    ///Performs stream reading and parsing
+    ///
+    ///Returns a request / response if successful
     pub fn parse_incoming(&mut self) -> Result<HttpData> {
         if self.readed {
             return Err(Error::UnableToRead);
@@ -88,6 +93,9 @@ impl Connection {
         Ok(parsed)
     }
 
+    ///Writes a structure that implements the trait Builder
+    ///
+    ///Structure in process consumed
     pub fn write_builder<T>(&mut self, response: T) -> Result<()>
         where T: Builder
     {
