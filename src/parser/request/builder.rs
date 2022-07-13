@@ -13,8 +13,8 @@ use crate::parser::{
 ///use weber::parser::{
 ///    Builder,
 ///    request::{
-///        builder::RequestBuilder,
-///        parser::RequestParser,
+///        RequestBuilder,
+///        RequestParser,
 ///        Method::GET
 ///    }
 ///};
@@ -39,7 +39,7 @@ use crate::parser::{
 ///```
 ///use weber::parser::{
 ///    ContentType,
-///    request::builder::RequestBuilder
+///    request::RequestBuilder
 ///};
 ///
 ///let builder = RequestBuilder::new().set_content("abc".as_bytes(), ContentType::Html);

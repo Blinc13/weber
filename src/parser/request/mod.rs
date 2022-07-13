@@ -1,9 +1,12 @@
 //!This module contains methods for parsing and building request
 
-pub use method::Method;
+pub use builder::RequestBuilder;
+pub use parser::RequestParser;
 pub use path::PathParser;
+
+pub use method::Method;
 
 pub mod builder;
 pub mod parser;
-pub mod method;
+mod method;
 mod path;

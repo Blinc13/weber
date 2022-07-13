@@ -16,8 +16,8 @@ use crate::parser::{
 ///use weber::parser::{
 ///    Builder,
 ///    request::{
-///        parser::RequestParser,
-///        builder::RequestBuilder,
+///        RequestParser,
+///        RequestBuilder,
 ///
 ///        Method::GET
 ///    },
