@@ -6,14 +6,22 @@ use ContentType::*;
 ///From the example in the readme, you can already understand how to use
 pub struct Content {
     pub content: Vec<u8>,
-    pub r#type: ContentType
+    pub r#type: ContentType,
+    pub status_code: u16,
+    pub reason: String
 }
 
 impl Content {
-    pub fn new(content: Vec<u8>, r#type: ContentType) -> Self {
+    pub fn new(content: Vec<u8>, r#type: ContentType, status_code: u16) -> Self {
+        Self::new_with_reason(content, r#type, status_code, "OK")
+    }
+
+    pub fn new_with_reason(content: Vec<u8>, r#type: ContentType, status_code: u16, reason: &str) -> Self {
         Self {
             content,
-            r#type
+            r#type,
+            status_code,
+            reason: reason.to_string()
         }
     }
 }
@@ -26,7 +34,8 @@ pub enum ContentType {
     Html,
     Json,
     Png,
-    Jpeg
+    Jpeg,
+    Ico
 }
 
 impl Display for ContentType {
@@ -34,8 +43,9 @@ impl Display for ContentType {
         let s = match self {
             Html => "text/html",
             Json => "text/json",
-            Png => "text/png",
-            Jpeg => "text/jpeg",
+            Png => "image/png",
+            Jpeg => "image/jpeg",
+            Ico => "image/x-icon"
         };
 
         write!(f, "{}", s)

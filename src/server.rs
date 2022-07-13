@@ -1,9 +1,16 @@
 //TODO: Refactor this
 
-use crate::parser::{Content, ContentType, request::parser::RequestParser, response::builder::ResponseBuilder};
-use crate::net::{
-    Listener,
-    Connection
+use crate::{
+    net::{
+        Listener,
+        Connection
+    },
+    parser::{
+        Content,
+        ContentType,
+        request::parser::RequestParser,
+        response::builder::ResponseBuilder
+    }
 };
 
 use std::{collections::HashMap, sync::Arc, io::Read};
@@ -23,12 +30,13 @@ type Pages = HashMap<String, Page>;
 ///let mut server = weber::HttpServer::new(1);
 ///
 ///server.add_page("/", | _ | {
-///    Content::new("Some html!".as_bytes().to_vec(), ContentType::Html)
+///    Content::new("Some html!".as_bytes().to_vec(), ContentType::Html, 200)
 ///});
 ///```
 pub struct HttpServer {
     workers: ThreadPool,
     pages: Option<Pages>,
+    notfound_handler: Page
 }
 
 impl HttpServer {
@@ -36,17 +44,25 @@ impl HttpServer {
         let workers = ThreadPool::new(thread_count);
         let pages = Some(HashMap::new());
 
-        Self { workers, pages }
+        Self {
+            workers,
+            pages,
+            notfound_handler: Box::new(standart_notfound_handler)
+        }
     }
 
-    ///Adds a closure associated with the page
     pub fn add_page<T>(&mut self, page: &str, func: T)
-    where
-        T: Fn(&RequestParser) -> Content + Sync + Send + 'static,
+    where T: Fn(&RequestParser) -> Content + Sync + Send + 'static,
     {
         let func = Box::new(func);
 
         self.pages.as_mut().unwrap().insert(page.to_string(), func);
+    }
+
+    pub fn set_notfound_handler<T>(&mut self, func: T)
+    where T: Fn(&RequestParser) -> Content + Sync + Send + 'static
+    {
+        self.notfound_handler = Box::new(func);
     }
 
     pub fn add_resource(&mut self, page: &str, resource: &'static str, r#type: ContentType) {
@@ -56,36 +72,47 @@ impl HttpServer {
 
             file.read_to_end(&mut content).unwrap();
 
-            Content::new(content, r#type)
+            Content::new(content, r#type, 200)
         });
     }
 
     pub fn run(mut self, ip: &str) {
         let listener = Listener::new(ip).unwrap();
 
-        let ptr = Arc::new(self.pages.take().unwrap());
+        let pages = Arc::new(self.pages.take().unwrap());
+        let handler = Arc::new(self.notfound_handler);
 
         for connection in listener.listen() {
-            let copy = ptr.clone();
+            let pages = pages.clone();
+            let handler = handler.clone();
 
             self.workers.execute(move || {
-                Self::response(connection, copy)
+                Self::response(connection, pages, handler)
             });
         }
     }
 
-    fn response(mut connection: Connection, pages_list: Arc<Pages>) {
+    fn response(mut connection: Connection, pages_list: Arc<Pages>, notfound_handler: Arc<Page>) {
         let parsed = connection.parse_incoming().unwrap().as_request();
         let parsed_path = &parsed.path;
 
         let content = match pages_list.get(&parsed_path.path) {
-            Some(func) => func(&parsed),
-            None => Content::new("PAGE NOT FOUND".as_bytes().to_vec(), ContentType::Html)
+            Some(page) => page(&parsed),
+            None => notfound_handler(&parsed)
         };
 
-        let resp = ResponseBuilder::new()
-                .set_content(&content.content, content.r#type);
-
-        connection.write_builder(resp).unwrap();
+        connection.write_builder(
+            ResponseBuilder::new()
+                .set_code(content.status_code)
+                .set_reason(&content.reason)
+                .set_content(&content.content, content.r#type)
+        ).unwrap();
     }
+}
+
+fn standart_notfound_handler(_parsed: &RequestParser) -> Content {
+    let html = "<!DOCTYPE html>
+    <html><head><h1>Weber</h1></head><body>404 Not Found</body></html>";
+
+    Content::new_with_reason(html.as_bytes().to_vec(), ContentType::Html, 404, "PAGE NOT FOUND")
 }

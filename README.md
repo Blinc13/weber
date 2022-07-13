@@ -52,7 +52,7 @@ fn main() {
         ", foo, bar); // Format html using received values
         
         // Returning content
-        Content::new(html.as_bytes().to_vec(), ContentType::Html)
+        Content::new(html.as_bytes().to_vec(), ContentType::Html, 200)
     });
 
     server.run("127.0.0.1:7080"); // Run server on localhost:7080
