@@ -1,5 +1,5 @@
 [<img src="https://crates.io/favicon.ico" width="50"/>](https://crates.io/crates/weber)
-[<img src="https://github.githubassets.com/favicons/favicon-dark.svg" width="50"/>](https://github.com/Blinc13/weber)
+[<img src="https://github.githubassets.com/favicons/favicon.svg" width="50"/>](https://github.com/Blinc13/weber)
 ---
 # Example
 ```rust
