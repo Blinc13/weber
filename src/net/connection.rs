@@ -1,4 +1,4 @@
-use std::io::{Read, Write, BufRead, BufReader};
+use std::io::{Read, Write, BufRead, BufReader, ErrorKind};
 use std::net::TcpStream;
 use crate::{
     net::{
@@ -49,7 +49,6 @@ impl Connection {
             return Err(Error::UnableToRead);
         } // If stream is already readed, return Err::BadRequest
 
-
         // Create buffers. vec has a minimum size to allocate for optimization
         let mut buf = BufReader::new(self.stream.take().unwrap());
         let mut vec = Vec::with_capacity(CAPACITY);
@@ -70,7 +69,10 @@ impl Connection {
         let headers = parsed.headers();
         parsed.set_content(match headers.get("Content-Length") {
             Some(lenght) => {
-                let lenght: usize = String::from_utf8_lossy(lenght).parse().unwrap();
+                let lenght: usize = match String::from_utf8_lossy(lenght).parse() {
+                    Ok(i) => i,
+                    Err(_) => return Err(Error::BadRequest)
+                };
 
                 let mut vec = vec![0u8; lenght];
 
@@ -106,14 +108,16 @@ impl Connection {
         let mut stream = self.stream.take().unwrap();
         let response = response.build(); // Build the response
 
-        if let Err(e) = stream.write_all(&response) {
+        if let Err(_) = stream.write_all(&response) {
+            return Err(Error::UnableToWrite);
+        } // If unable to write, return an error
+
+        if let Err(e) = stream.flush() {
             return match e.kind() {
-                std::io::ErrorKind::ConnectionAborted => Err(Error::ConnectionLost),
+                ErrorKind::ConnectionAborted => Err(Error::ConnectionLost),
                 _ => Err(Error::ConnectionError)
             }
-        } // If unable to send, return an error
-
-        stream.flush().unwrap();
+        } // If sending failed, return an error
 
         self.stream = Some(stream);
         self.writed = true;
