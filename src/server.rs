@@ -1,6 +1,7 @@
 //!This module contains server structure
 
 use crate::{
+    error,
     net::{
         Listener,
         Connection
@@ -101,7 +102,7 @@ impl HttpServer {
     pub fn run(mut self, ip: &str) {
         let listener = match Listener::new(ip) {
             Ok(i) => i,
-            Err(e) => return error!("Failed to start listening, port may be busy")
+            Err(_) => return error!("Server", "Failed to start listening, port may be busy")
         };
 
         let pages = Arc::new(self.pages.take().unwrap());
@@ -120,8 +121,9 @@ impl HttpServer {
     fn response(mut connection: Connection, pages_list: Arc<Pages>, notfound_handler: Arc<Page>) {
         let parsed = match connection.parse_incoming() {
             Ok(i) => i.as_request(),
-            Err(e) => return error!("Error reading/parsing incoming request")
+            Err(_) => return error!("Server", "Error reading/parsing incoming request")
         };
+
         let parsed_path = &parsed.path;
 
         let content = match pages_list.get(&parsed_path.path) {
@@ -129,13 +131,16 @@ impl HttpServer {
             None => notfound_handler(&parsed)
         };
 
-         if let Err(e) = connection.write_builder(
-             ResponseBuilder::new()
+        let date = chrono::Utc::now().to_rfc3339();
+
+        if let Err(_) = connection.write_builder(
+            ResponseBuilder::new()
                 .set_code(content.status_code)
                 .set_reason(&content.reason)
+                .set_header("Date", &date)
                 .set_content(&content.content, content.r#type))
          {
-             error!("Error sending response");
+             error!("Server", "Error sending response");
          }
     }
 }

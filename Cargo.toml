@@ -17,3 +17,4 @@ authors = ["Blinc <https://github.com/Blinc13>"]
 [dependencies]
 threadpool = "1.8.1"
 httparse = "1.7.1"
+chrono = "0.4.19"

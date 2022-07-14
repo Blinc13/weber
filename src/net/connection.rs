@@ -22,8 +22,7 @@ pub struct Connection {
 }
 
 impl Connection {
-    ///Constructs a new Connection from TcpStream
-    pub fn new(stream: TcpStream) -> Self {
+    pub(crate) fn new(stream: TcpStream) -> Self {
         Self {
             stream: Some(stream),
             readed: false,
@@ -123,14 +122,5 @@ impl Connection {
         self.writed = true;
 
         Ok(())
-    }
-}
-
-impl HttpData {
-    fn set_content(&mut self, content: Option<Vec<u8>>) {
-        match self {
-            HttpData::Request(parsed) => parsed.content = content,
-            HttpData::Response(parsed) => parsed.content = content
-        }
     }
 }

@@ -93,4 +93,11 @@ impl HttpData {
             _ => panic!("This is not a response")
         }
     }
+
+    pub(crate) fn set_content(&mut self, content: Option<Vec<u8>>) {
+        match self {
+            HttpData::Request(parsed) => parsed.content = content,
+            HttpData::Response(parsed) => parsed.content = content
+        }
+    }
 }
