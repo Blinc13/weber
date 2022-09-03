@@ -3,6 +3,7 @@ pub use server::HttpServer;
 
 pub use parser::request;
 pub use parser::response;
+pub use parser::ContentType;
 
 pub mod parser;
 pub mod server;
