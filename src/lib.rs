@@ -63,6 +63,6 @@ macro_rules! print_event {
         println!("[{}] {}: {}", chrono::Utc::now().to_string(), $from, $message)
     };
     ($from: literal, $message: literal, $($args: tt),+) => {
-        println!("|{}| {}: {}", chrono::Utc::now().to_string(), $from, format!($message, $($args),+))
+        println!("[{}] {}: {}", chrono::Utc::now().to_string(), $from, format!($message, $($args),+))
     };
 }
