@@ -44,22 +44,22 @@ macro_rules! error {
 ///# Example
 ///- **Without args:**
 ///```
-///use weber::print_event;
+///use weber::message;
 ///
-///print_event!("Foo", "Bar");
+///message!("Foo", "Bar");
 ///```
 ///> The output will be:
 ///>> **[2022-07-14 09:15:21 UTC] Foo: Bar**
 ///- **With args:**
 ///```
-///use weber::print_event;
+///use weber::message;
 ///
-///print_event!("Foo", "Bar - {}", 15);
+///message!("Foo", "Bar - {}", 15);
 ///```
 ///> The output will be:
 ///>> **[2022-07-14 09:15:21 UTC] Foo: Bar - 15**
 #[macro_export]
-macro_rules! print_event {
+macro_rules! message {
     ($from: literal, $message: literal) => {
         println!("[{}] {}: {}", chrono::Utc::now().to_string(), $from, $message)
     };
