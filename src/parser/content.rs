@@ -36,7 +36,8 @@ pub enum ContentType {
     Png,
     Jpeg,
     Ico,
-    Javascript
+    Javascript,
+    Text
 }
 
 impl Display for ContentType {
@@ -47,7 +48,8 @@ impl Display for ContentType {
             Png => "image/png",
             Jpeg => "image/jpeg",
             Ico => "image/x-icon",
-            Javascript => "text/javascript"
+            Javascript => "text/javascript",
+            Text => "text/plain"
         };
 
         write!(f, "{}", s)
