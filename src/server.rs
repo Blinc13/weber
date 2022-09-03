@@ -48,7 +48,7 @@ impl HttpServer {
         Self {
             workers,
             pages,
-            notfound_handler: Box::new(standart_notfound_handler)
+            notfound_handler: Box::new(standard_notfound_handler)
         }
     }
 
@@ -145,7 +145,7 @@ impl HttpServer {
     }
 }
 
-fn standart_notfound_handler(_parsed: &RequestParser) -> Content {
+fn standard_notfound_handler(_parsed: &RequestParser) -> Content {
     let html = "<!DOCTYPE html>
     <html><head><h1>Weber</h1></head><body>404 Not Found</body></html>";
 

@@ -3,10 +3,13 @@ pub use server::HttpServer;
 
 pub use parser::request;
 pub use parser::response;
-pub use parser::ContentType;
+
+pub use content::Content;
+pub use content::ContentType;
 
 pub mod parser;
 pub mod server;
+pub mod content;
 pub mod net;
 
 ///Prints a message to stderr

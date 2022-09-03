@@ -2,13 +2,14 @@
 
 pub use header::Header;
 pub use builder::Builder;
-pub use content::{ContentType, Content};
 
 pub mod request;
 pub mod response;
+
+pub(crate) use crate::content::{Content, ContentType};
+
 mod header;
 mod builder;
-mod content;
 
 pub type Result<T> = std::result::Result<T, Error>;
 

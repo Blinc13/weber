@@ -1,11 +1,5 @@
 use std::collections::HashMap;
-use weber::{
-    HttpServer,
-    parser::{
-        Content,
-        ContentType
-    }
-};
+use weber::*;
 
 fn main() {
     // Building a server that runs in 4 threads
