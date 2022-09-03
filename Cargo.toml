@@ -5,7 +5,7 @@ description = "Simple web server with VERY limited functionality"
 keywords = ["weber", "server", "web"]
 
 repository = "https://github.com/Blinc13/weber"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 license = "GPL-3.0"
@@ -17,3 +17,4 @@ authors = ["Blinc <https://github.com/Blinc13>"]
 [dependencies]
 threadpool = "1.8.1"
 httparse = "1.7.1"
+chrono = "0.4.19"

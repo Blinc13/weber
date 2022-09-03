@@ -1,6 +1,7 @@
 //!This module contains server structure
 
 use crate::{
+    error,
     net::{
         Listener,
         Connection
@@ -57,7 +58,8 @@ impl HttpServer {
     {
         let func = Box::new(func);
 
-        self.pages.as_mut().unwrap().insert(page.to_string(), func);
+        self.pages.as_mut().unwrap()
+            .insert(page.to_string(), func);
     }
 
     ///Sets an invalid url handler.
@@ -98,7 +100,10 @@ impl HttpServer {
     ///
     ///See [**README.md**](https://github.com/Blinc13/weber/blob/master/README.md) for an example.
     pub fn run(mut self, ip: &str) {
-        let listener = Listener::new(ip).unwrap();
+        let listener = match Listener::new(ip) {
+            Ok(i) => i,
+            Err(_) => return error!("Server", "Failed to start listening, port may be busy")
+        };
 
         let pages = Arc::new(self.pages.take().unwrap());
         let handler = Arc::new(self.notfound_handler);
@@ -114,7 +119,11 @@ impl HttpServer {
     }
 
     fn response(mut connection: Connection, pages_list: Arc<Pages>, notfound_handler: Arc<Page>) {
-        let parsed = connection.parse_incoming().unwrap().as_request();
+        let parsed = match connection.parse_incoming() {
+            Ok(i) => i.as_request(),
+            Err(_) => return error!("Server", "Error reading/parsing incoming request")
+        };
+
         let parsed_path = &parsed.path;
 
         let content = match pages_list.get(&parsed_path.path) {
@@ -122,12 +131,17 @@ impl HttpServer {
             None => notfound_handler(&parsed)
         };
 
-        connection.write_builder(
+        let date = chrono::Utc::now().to_rfc3339();
+
+        if let Err(_) = connection.write_builder(
             ResponseBuilder::new()
                 .set_code(content.status_code)
                 .set_reason(&content.reason)
-                .set_content(&content.content, content.r#type)
-        ).unwrap();
+                .set_header("Date", &date)
+                .set_content(&content.content, content.r#type))
+         {
+             error!("Server", "Error sending response");
+         }
     }
 }
 
