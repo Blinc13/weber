@@ -1,4 +1,4 @@
-use std::net::TcpListener;
+use std::net::{TcpListener, SocketAddr};
 use crate::net::{
     Error,
     Result,
@@ -14,10 +14,10 @@ pub struct Listener {
 }
 
 impl Listener {
-    pub fn new(ip: &str) -> Result<Self> {
-        match TcpListener::bind(ip) {
+    pub fn new(addr: SocketAddr) -> Result<Self> {
+        match TcpListener::bind(addr) {
             Ok(listener) => Ok( Self{ listener } ),
-            Err(_) => return Err(Error::ConnectionError)
+            Err(_) => Err(Error::ConnectionError)
         }
     }
 

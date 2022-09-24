@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::net::{SocketAddr, SocketAddrV4};
 use weber::*;
 
 fn main() {
@@ -43,5 +44,10 @@ fn main() {
         Content::new(html.as_bytes().to_vec(), ContentType::Html, 200)
     });
 
-    server.run("127.0.0.1:7080"); // Run server on localhost:7080
+    let addr = SocketAddrV4::new(
+        "127.0.0.1".parse().unwrap(),
+        7080
+    );
+
+    server.run(SocketAddr::V4(addr)); // Run server on localhost:7080
 }

@@ -14,7 +14,7 @@ use crate::{
     }
 };
 
-use std::{collections::HashMap, sync::Arc, io::Read};
+use std::{collections::HashMap, sync::Arc, io::Read, net::SocketAddr};
 use threadpool::ThreadPool;
 
 type Page = Box<dyn Fn(&RequestParser) -> Content + Sync + Send>;
@@ -99,7 +99,7 @@ impl HttpServer {
     ///Starts the server on the given ip and port
     ///
     ///See [**README.md**](https://github.com/Blinc13/weber/blob/master/README.md) for an example.
-    pub fn run(mut self, ip: &str) {
+    pub fn run(mut self, ip: SocketAddr) {
         let listener = match Listener::new(ip) {
             Ok(i) => i,
             Err(_) => return error!("Server", "Failed to start listening, port may be busy")
